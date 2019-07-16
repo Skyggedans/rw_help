@@ -29,7 +29,9 @@ class _MyAppState extends State<MyApp> {
           title: const Text('RealWear HMT-1(Z1) help example app'),
         ),
         body: Builder(builder: (BuildContext context) {
-          return const Text('Say "Show help"');
+          return Center(
+            child: const Text('Say "Show help"'),
+          );
         }),
       ),
     );
