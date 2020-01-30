@@ -1,7 +1,6 @@
 package com.rockwellits.rw_plugins.rw_help
 
 import android.app.Activity
-import android.app.Application
 import android.content.Intent
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
