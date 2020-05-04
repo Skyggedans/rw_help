@@ -2,6 +2,10 @@ package com.rockwellits.rw_plugins.rw_help
 
 import android.app.Activity
 import android.content.Intent
+import androidx.annotation.NonNull
+import io.flutter.embedding.engine.plugins.FlutterPlugin
+import io.flutter.embedding.engine.plugins.activity.ActivityAware
+import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
@@ -9,20 +13,30 @@ import io.flutter.plugin.common.MethodChannel.Result
 import io.flutter.plugin.common.PluginRegistry.Registrar
 
 
-class RwHelpPlugin(val activity: Activity, val channel: MethodChannel) : MethodCallHandler {
-    private val ACTION_UPDATE_HELP = "com.realwear.wearhf.intent.action.UPDATE_HELP_COMMANDS"
-    private val EXTRA_TEXT = "com.realwear.wearhf.intent.extra.HELP_COMMANDS"
-    private val EXTRA_SOURCE = "com.realwear.wearhf.intent.extra.SOURCE_PACKAGE"
-
+class RwHelpPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
+    lateinit var activity: Activity
     private var commands: ArrayList<String>? = null
 
     companion object {
+        const val CHANNEL = "com.rockwellits.rw_plugins/rw_help"
+        const val ACTION_UPDATE_HELP = "com.realwear.wearhf.intent.action.UPDATE_HELP_COMMANDS"
+        const val EXTRA_TEXT = "com.realwear.wearhf.intent.extra.HELP_COMMANDS"
+        const val EXTRA_SOURCE = "com.realwear.wearhf.intent.extra.SOURCE_PACKAGE"
+
         @JvmStatic
         fun registerWith(registrar: Registrar) {
-            val channel = MethodChannel(registrar.messenger(), "com.rockwellits.rw_plugins/rw_help")
+            val channel = MethodChannel(registrar.messenger(), CHANNEL)
+            val plugin = RwHelpPlugin()
 
-            channel.setMethodCallHandler(RwHelpPlugin(registrar.activity(), channel))
+            plugin.activity = registrar.activity()
+            channel.setMethodCallHandler(plugin)
         }
+    }
+
+    override fun onAttachedToEngine(@NonNull flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
+        val channel = MethodChannel(flutterPluginBinding.getFlutterEngine().getDartExecutor(), CHANNEL)
+
+        channel.setMethodCallHandler(this)
     }
 
     override fun onMethodCall(call: MethodCall, result: Result) {
@@ -33,6 +47,22 @@ class RwHelpPlugin(val activity: Activity, val channel: MethodChannel) : MethodC
             }
             else -> result.notImplemented()
         }
+    }
+
+    override fun onDetachedFromEngine(@NonNull binding: FlutterPlugin.FlutterPluginBinding) {
+    }
+
+    override fun onAttachedToActivity(binding: ActivityPluginBinding) {
+        this.activity = binding.activity
+    }
+
+    override fun onDetachedFromActivity() {
+    }
+
+    override fun onDetachedFromActivityForConfigChanges() {
+    }
+
+    override fun onReattachedToActivityForConfigChanges(binding: ActivityPluginBinding) {
     }
 
     private fun applyCommands() {
